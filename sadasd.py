@@ -8,8 +8,7 @@ base_url = 'https://steamcommunity.com/market/search?appid=730&q=#p1'
 
 
 def ss_parse():
-    urls = []
-    urls.append(base_url)
+    urls = [base_url]
     session = requests.Session()
     request = session.get(base_url, headers=headers)
     if request.status_code == 200:
