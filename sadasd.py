@@ -7,7 +7,7 @@ headers = {'accept': '*/*',
 base_url = 'https://steamcommunity.com/market/search?appid=730&q=#p1'
 
 
-def ss_parse(base_url, headers):
+def ss_parse():
     urls = []
     urls.append(base_url)
     session = requests.Session()
@@ -34,4 +34,4 @@ def ss_parse(base_url, headers):
         print("error")
 
 
-ss_parse(base_url, headers)
+ss_parse()
