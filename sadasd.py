@@ -21,6 +21,7 @@ def ss_parse():
                 if url not in urls:
                     urls.append(url)
         except:
+            # Handle error here!
             pass
 
         resultRows = soup.find_all('div', attrs={'id': 'searchResultsRows'})
@@ -31,6 +32,7 @@ def ss_parse():
                 print("LINK: ", a["href"])
 
     else:
+        # Handle error here! Make sure to specify what the heck has happened
         print("error")
 
 
