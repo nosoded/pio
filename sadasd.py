@@ -23,11 +23,11 @@ def ss_parse():
         except:
             pass
 
-        urlparse = soup.find_all('div', attrs={'id': 'searchResultsRows'})
+        resultRows = soup.find_all('div', attrs={'id': 'searchResultsRows'})
 
-        for parseuk in urlparse:
-            hrefUK = parseuk.find_all('a', attrs={'class': 'market_listing_row_link'})
-            for a in hrefUK:
+        for row in resultRows:
+            link = row.find_all('a', attrs={'class': 'market_listing_row_link'})
+            for a in link:
                 print("LINK: ", a["href"])
 
     else:
