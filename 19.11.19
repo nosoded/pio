@@ -12,7 +12,7 @@ def ss_parse(base_url, headers):
     j = []
     urls.append(base_url)
     session = requests.Session()
-    r = requests.get("https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=1&item_nameid=49359124&two_factor=0")
+    r = requests.get("https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=1&item_nameid=176096463&two_factor=0")
     request = session.get(base_url, headers=headers)
     z = r.content
     parsed_string = json.loads(z)
@@ -44,11 +44,12 @@ def ss_parse(base_url, headers):
                 z = a["href"]
                 somebody = session.get(z, headers = headers)
                 souup = BeautifulSoup(somebody.content, 'html5lib')
-                sightparse = souup.find_all('div', attrs={'id': 'market_commodity_buyrequests'})
-                #print(sightparse)
-                for lolo in sightparse:
-                    itemname = lolo.find_all('span', attrs={'class': 'market_commodity_orders_header_promote'})
+                sightparse = souup.find_all('script', attrs={'type': 'text/javascript'})
+                print(sightparse)
+                #for lolo in sightparse:
+                    #itemname = lolo.find_all('span', attrs={'class': 'market_commodity_orders_header_promote'})
                     #print(itemname)
     else:
         print("error")
 ss_parse(base_url,headers)
+
