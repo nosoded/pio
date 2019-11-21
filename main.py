@@ -1,0 +1,64 @@
+import re
+
+from bs4 import BeautifulSoup
+import requests
+import json
+headers = {'accept': '*/*',
+           'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0'}
+
+base_url = 'https://steamcommunity.com/market/search?appid=730&q=#p1'
+def ss_parse(base_url, headers):
+    urls = []
+    z = []
+    prs = []
+    j = []
+    urls.append(base_url)
+    session = requests.Session()
+    r = requests.get("https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=1&item_nameid=176096463&two_factor=0")
+    request = session.get(base_url, headers=headers)
+    z = r.content
+    parsed_string = json.loads(z)
+    prs = parsed_string['buy_order_graph']
+    j = prs[0]
+    print(j[0])
+
+    if request.status_code == 200:
+        soup = BeautifulSoup(request.content, 'html5lib')
+        try:
+            count = int(1301)
+            for i in range(count):
+                url = f'https://steamcommunity.com/market/search?appid=730&q=#p{i}'
+                if url not in urls:
+                    urls.append(url)
+        except:
+            pass
+        urlparse = soup.find_all('div', attrs={'id': 'searchResultsRows'})
+        firstpriceparse = soup.find_all('span', attrs={'class': 'market_table_value normal_price'})
+        #secondpriceparse = souuup.find_all('span', attrs={'class': "market_commodity_orders_header_promote"})
+        #print(secondpriceparse)
+        for fp in firstpriceparse:
+            firstprice = fp.find('span', attrs={'class': 'normal_price'})['data-price']
+            #print(int(firstprice)/100)
+
+        for parseuk in urlparse:
+            hrefUK = parseuk.find_all('a', attrs={'class': 'market_listing_row_link'})
+            for a in hrefUK:
+                z = a["href"]
+
+                print("var z = ", z)
+                somebody = session.get(z, headers = headers)
+                souup = BeautifulSoup(somebody.content, 'html5lib')
+                sightparse = souup.find_all('script', attrs={'type': 'text/javascript'})
+                result = re.search('ItemActivityTicker.Start\((.*)\)', sightparse.__str__())
+                itemId = result.group(1)
+                print(itemId)
+                print("------------------------------------------------------------------------------------")
+                #for lolo in sightparse:
+                    #itemname = lolo.find_all('span', attrs={'class': 'market_commodity_orders_header_promote'})
+                    #print(itemname)
+    else:
+        print("failed to execute request: ", request)
+        print(request.content)
+
+ss_parse(base_url,headers)
+
