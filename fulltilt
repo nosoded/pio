@@ -1,0 +1,118 @@
+#import libraries
+import requests
+import time
+from bs4 import BeautifulSoup
+import re
+import json
+from random import choice
+
+def get_tor_session():
+    session = requests.session()
+    #connect to tor proxy
+    session.proxies = {'http':  'socks5://127.0.0.1:9050',
+                       'https': 'socks5://127.0.0.1:9050'}
+    useragents = open('useragents.txt').read().split('\n')
+    session.headers = {'User-Agent': choice(useragents)}
+    return session
+
+session = get_tor_session()
+
+def s_p():
+    base_url = 'https://steamcommunity.com/market/search/render/?query=&start={}&count=10&search_descriptions=0&sort_column=price&sort_dir=desc&appid=730'
+    count = 14500
+    x = 0
+    y = 0
+    listofautoprices = []
+    listofprices = []
+
+    for i in range(5000,count,10):
+
+        url = base_url.format(i)
+        request = session.get(url).json()
+        jsonrequest1 = request
+
+        try:
+
+            html_content = jsonrequest1['results_html']
+            zoop = html_content
+            soup = BeautifulSoup(zoop, 'html5lib')
+            #urlparse = soup.find_all('a', attrs={'class': 'market_listing_row_link'})
+            #print(urlparse)
+            hrefUK = soup.find_all('a', attrs={'class': 'market_listing_row_link'})
+
+            for a in hrefUK:
+                z = a["href"]
+                print("var z = ", z)
+
+                try:
+
+                    somebody = session.get(z)
+                    souup = BeautifulSoup(somebody.content, 'html5lib')
+                    sightparse = souup.find_all('script', attrs={'type': 'text/javascript'})
+
+                    try:
+
+                        result = re.search('ItemActivityTicker.Start\((.*)\)', sightparse.__str__())
+                        itemId = result.group(1)
+                    except:
+
+                        result = re.search('Market_LoadOrderSpread\((.*)\)', sightparse.__str__())
+                        itemId = result.group(1)
+                except:
+                    pass
+
+                try:
+
+                    fpurl = f'https://steamcommunity.com/market/itemordershistogram?country=RU&language=english&currency=1&item_nameid={itemId[1:-1]}'
+                    r = requests.get(fpurl)
+                    z = r.content
+                    parsed_string = json.loads(z)
+                    prs = parsed_string['buy_order_graph']
+                    j = prs[0]
+                    listofautoprices.append(j[0])
+
+                    prs1 = parsed_string['sell_order_graph']
+                    zooper = prs1[0]
+                    listofprices.append(zooper[0])
+                    summa1 = listofprices[-1] * 0.85
+                    if y != 0:
+
+                        if listofautoprices[-1] == listofautoprices[y-1]:
+
+                            print("problem with proxy")
+                            time.sleep(60)
+                        else:
+                            print(listofautoprices[-1])
+                            print(listofprices[-1])
+
+                            if listofprices[-1] * 0.85 > listofautoprices[-1]:
+
+                                print("Это предложение выгодное")
+                                print(summa1 - listofautoprices[-1])
+
+                            else:
+                                print("Это предложение не выгодно")
+                    else:
+                        print(listofautoprices[-1])
+                        print(listofprices[-1])
+                        if summa1 > listofautoprices[-1]:
+                            print("Это предложение выгодное")
+                            print ("Прибыль :" + summa1 - listofautoprices[-1])
+                        else:
+                            print("Это предложение не выгодно")
+                        y = y+1
+                except:
+                    pass
+
+                print("------------------------------------------------------------------------------------")
+                time.sleep(2)
+                x=x+1
+                if x == 3:
+                    x = 0
+                    time.sleep(10)
+
+        except:
+            time.sleep(15)
+            pass
+
+s_p()
